@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="signalr.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <title>Document</title>
+    <script>
+        $(document).ready(function()
+        {
+            // new instance on signalr class with connection
+            const connection = new signalR.HubConnectionBuilder().
+            withUrl("http://localhost:58720/myhub").build();
+
+            // connection open
+            connection.start();
+
+            // if btn click..
+            $("#btn").click(function()
+            {
+                // txtMessage(textBox) value set to "message"
+                let message = $("#txtMessage").val();
+
+                // event invoke backend service in method(SendMessageAsync) and send message parametr
+                connection.invoke("SendMessageAsync",message).catch(
+                    error=>console.log("Mesaj gönderilirken hata oluştu" +error));
+                
+            })
+            // backend service response on receiveMessage and send message
+            connection.on("receiveMessage",message=>{
+                let currentValue = $("#messages").val();
+                $("#messages").val(currentValue+" "+message);
+            })
+        })
+    </script>
+</head>
+<body>
+    <div class="form-group col-md-6">
+        <div class="input-group mb-3 mt-5">
+            <input type="text" id="txtMessage" class="form-control" placeholder="Mesaj">
+            <br>
+            <input type="button" id="btn" class="form-control btn-success" value="Gönder">
+        </div>
+
+        <div class="input-group">
+            <span class="input-group-text">Mesajlar</span>
+            <textarea class="form-control" id="messages" aria-label="With textarea"></textarea>
+          </div>
+    </div>
+</body>
+</html>
